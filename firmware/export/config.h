@@ -1387,6 +1387,10 @@ Lyre prototype 1 */
 #else
 #define USB_ENABLE_CHARGING_ONLY
 #endif
+
+#if defined(USB_HAS_BULK) && defined(USB_HAS_INTERRUPT)
+#define USB_ENABLE_MTP
+#endif
 #endif
 
 #ifdef USB_HAS_ISOCHRONOUS

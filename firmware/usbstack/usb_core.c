@@ -53,6 +53,10 @@
 #include "usb_audio_def.h" // DEBUG
 #endif
 
+#ifdef USB_ENABLE_MTP
+#include "usb_mtp.h"
+#endif
+
 /* TODO: Move target-specific stuff somewhere else (serial number reading) */
 
 #if defined(IPOD_ARCH) && defined(CPU_PP)
@@ -133,6 +137,11 @@ USB_STRING_INITIALIZER(u"Rockbox media player");
 static struct usb_string_descriptor usb_string_iSerial =
 USB_STRING_INITIALIZER(u"00000000000000000000000000000000000000000");
 
+#ifdef USB_ENABLE_MTP
+static const struct usb_string_descriptor usb_string_mtp =
+USB_STRING_INITIALIZER(u"MTP");
+#endif
+
 /* Generic for all targets */
 
 /* this is stringid #0: languages supported */
@@ -146,6 +155,9 @@ static const struct usb_string_descriptor* const usb_strings[USB_STRING_INDEX_MA
     [USB_STRING_INDEX_MANUFACTURER] = &usb_string_iManufacturer,
     [USB_STRING_INDEX_PRODUCT] = &usb_string_iProduct,
     [USB_STRING_INDEX_SERIAL] = &usb_string_iSerial,
+#ifdef USB_ENABLE_MTP
+    [USB_STRING_INDEX_MTP] = &usb_string_mtp,
+#endif
 };
 
 static int usb_address = 0;
@@ -281,6 +293,28 @@ static struct usb_class_driver drivers[USB_NUM_DRIVERS] =
 #endif
         .set_interface = usb_audio_set_interface,
         .get_interface = usb_audio_get_interface,
+    },
+#endif
+#ifdef USB_ENABLE_MTP
+    [USB_DRIVER_MTP] = {
+        .enabled = false,
+        .needs_exclusive_storage = false,
+        .first_interface = 0,
+        .last_interface = 0,
+        .request_endpoints = usb_mtp_request_endpoints,
+        .set_first_interface = usb_mtp_set_first_interface,
+        .get_config_descriptor = usb_mtp_get_config_descriptor,
+        .init_connection = usb_mtp_init_connection,
+        .init = usb_mtp_init,
+        .disconnect = usb_mtp_disconnect,
+        .transfer_complete = usb_mtp_transfer_complete,
+        .fast_transfer_complete = NULL,
+        .control_request = usb_mtp_control_request,
+#ifdef HAVE_HOTSWAP
+        .notify_hotswap = usb_mtp_notify_hotswap,
+#endif
+        .set_interface = NULL,
+        .get_interface = NULL,
     },
 #endif
 };
@@ -1252,3 +1286,11 @@ int usb_charging_maxcurrent()
     return 100;
 }
 #endif
+
+const struct usb_string_descriptor* usb_core_get_string(int index)
+{
+    if (index < 0 || index >= USB_STRING_INDEX_MAX)
+        return NULL;
+
+    return usb_strings[index];
+}

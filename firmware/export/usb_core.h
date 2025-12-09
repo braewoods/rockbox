@@ -44,6 +44,9 @@ enum {
     USB_STRING_INDEX_MANUFACTURER,
     USB_STRING_INDEX_PRODUCT,
     USB_STRING_INDEX_SERIAL,
+#ifdef USB_ENABLE_MTP
+    USB_STRING_INDEX_MTP,
+#endif
     USB_STRING_INDEX_MAX,
 };
 
@@ -72,6 +75,8 @@ void usb_core_release_endpoint(int dir);
 #ifdef HAVE_HOTSWAP
 void usb_core_hotswap_event(int volume,bool inserted);
 #endif
+
+const struct usb_string_descriptor* usb_core_get_string(int index);
 
 #endif
 

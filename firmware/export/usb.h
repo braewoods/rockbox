@@ -171,6 +171,9 @@ enum {
 #ifdef USB_ENABLE_AUDIO
     USB_DRIVER_AUDIO,
 #endif
+#ifdef USB_ENABLE_MTP
+    USB_DRIVER_MTP,
+#endif
     USB_NUM_DRIVERS
 };
 
